@@ -23,11 +23,7 @@ def read_spec(filename):
 def parse_spec(specf):
 
     spec = read_spec(specf)
-    released_kernel = None
-    rcrev = None
-    gitrev = None
-    base_sublevel = None
-    stable_update = None
+    specv = {}
 
     if spec is None:
         sys.exit(0)
@@ -40,29 +36,30 @@ def parse_spec(specf):
 
         var = match.group('var')
         if var == "released_kernel":
-            released_kernel = match.group('val')
+            specv['released_kernel'] = match.group('val')
             continue
         elif var == "base_sublevel":
-            base_sublevel = match.group('val')
+            specv['base_sublevel'] = match.group('val')
             continue
         elif var == "rcrev":
-            rcrev = match.group('val')
+            specv['rcrev'] = match.group('val')
             continue
         elif var == "gitrev":
-            gitrev = match.group('val')
+            specv['gitrev'] = match.group('val')
             continue
         elif var == "stable_update":
-            stable_update = match.group('val')
+            specv['stable_update'] = match.group('val')
             continue
         else:
             continue
 
-    print released_kernel
-    print base_sublevel
-    print rcrev
-    print gitrev
-    print stable_update
+    print specv['released_kernel']
+    print specv['base_sublevel']
+    print specv['rcrev']
+    print specv['gitrev']
+    print specv['stable_update']
 
+    return specv
 
 if __name__ == "__main__":
     parse_spec(spec_filename)
