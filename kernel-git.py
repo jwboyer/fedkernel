@@ -185,15 +185,33 @@ def check_pkg(msg):
     return buildinfo
 
 
+def lookup_branch(branch):
+    branches = {
+            'f21': 'f21',
+            'f22': 'f22',
+            'f23': 'f23',
+            'f24': 'master'
+            }
+
+    try:
+        b = branches[branch]
+    except:
+        b = None
+
+    return b
+
+
 def create_tree(info):
 
     print "Creating tree for pkg-git commit %s with tag %s" % info
     sha = info[0]
     tag = info[1]
-    branch = 'f' + re.split(r'.*fc(\d+)', tag)[1]
+    b = 'f' + re.split(r'.*fc(\d+)', tag)[1]
 
-    if branch == 'f24':
-        branch = 'rawhide'
+    branch = lookup_branch(b)
+    if branch is None:
+        print 'Could not create tree for branch %s' % b
+        return
 
     pkg = Repo(pkg_git_dir)
     pkg_git = pkg.git
