@@ -13,6 +13,9 @@ import fedmsg
 import fedmsg.config
 import fedmsg.meta
 
+import pyrpkg
+import fedpkg
+
 from git import Repo
 
 from parse_spec import *
@@ -200,8 +203,17 @@ def lookup_branch(branch):
 
     return b
 
+def prep_pkg_git(fedcli):
 
-def create_tree(info):
+    fedcli.args = fedcli.parser.parse_args(['prep'])
+    fedcli.args.path = pkg_git_dir
+
+    fedcli.args.arch = None
+    fedcli.args.builddir = None
+
+    fedcli.args.command()
+
+def create_tree(fedcli, info):
 
     print "Creating tree for pkg-git commit %s with tag %s" % info
     sha = info[0]
@@ -220,9 +232,17 @@ def create_tree(info):
     pkg_git.checkout(branch)
     pkg_git.reset('--hard', '%s' % sha)
 
-    parse_spec("%s/kernel.spec" % pkg_git_dir)
+    prep_pkg_git(fedcli)
+
+    specv = parse_spec("%s/kernel.spec" % pkg_git_dir)
 
 if __name__ == '__main__':
+
+    fedcfg = ConfigParser.SafeConfigParser()
+    fedcfg.read('/etc/rpkg/fedpkg.conf')
+
+    fedcli = fedpkg.cli.fedpkgClient(fedcfg, name='fedpkg')
+    fedcli.do_imports(site='fedpkg')
 
     config = fedmsg.config.load_config([], None)
     fedmsg.meta.make_processors(**config)
@@ -235,7 +255,7 @@ if __name__ == '__main__':
         if info is None:
             continue
 
-        create_tree(info)
+        create_tree(fedcli, info)
 #			if "kernel" in msg['msg']['name']:
 #			if msg['msg']['instance'] == "primary":
 #				if msg['msg']['new'] == 1:
