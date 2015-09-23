@@ -5,6 +5,7 @@ import string
 import time
 import thread
 import sys
+import tempfile
 
 import ConfigParser
 import koji
@@ -146,7 +147,7 @@ def get_sha(tasklabel):
     return sha
 
 
-def get_build_info(build_id):
+def get_build_info(build_id, nvr=False):
 
     global options
     options = Options()
@@ -155,7 +156,11 @@ def get_build_info(build_id):
     session = koji.ClientSession(options.server)
     activate_session(session)
 
-    info = session.getBuild(int(build_id))
+    if nvr is True:
+        info = session.getBuild(build_id)
+    else:
+        info = session.getBuild(int(build_id))
+
     if info is None:
         print "No such build: %s" % build
         return None
@@ -243,6 +248,7 @@ def create_tree(fedcli, info):
     # Get the working directory for this pkg git tree and the git repo
     # that it contains
     wdir = get_work_dir(specv, tag)
+    wdir = pkg_git_dir + '/' + wdir
 
     prepr = Repo(wdir)
     prepg = prepr.git
@@ -275,7 +281,14 @@ def create_tree(fedcli, info):
     # Note: Another warning about scale here.  This is literally all of the
     # patches we have in the spec.  It might be large.  We'll see I guess.
     patch = prepg.format_patch('--stdout', '%s' % (baserev + '..'))
+    temp = tempfile.NamedTemporaryFile(suffix=".patch", delete=False)
 
+    for line in patch:
+        temp.write(line.encode("utf-8"))
+
+    print temp.name
+    temp.flush()
+    temp.close()
 
 if __name__ == '__main__':
 
@@ -285,18 +298,23 @@ if __name__ == '__main__':
     fedcli = fedpkg.cli.fedpkgClient(fedcfg, name='fedpkg')
     fedcli.do_imports(site='fedpkg')
 
-    config = fedmsg.config.load_config([], None)
-    fedmsg.meta.make_processors(**config)
 
-    for name, endpoint, topic, msg in fedmsg.tail_messages(**config):
-        info = None
-        if "buildsys.build.state.change" in topic:
-            info = check_pkg(msg['msg'])
+    if sys.argv[1] != None:
+        info = get_build_info(sys.argv[1], True)
+    else:
 
-        if info is None:
-            continue
+        config = fedmsg.config.load_config([], None)
+        fedmsg.meta.make_processors(**config)
 
-        create_tree(fedcli, info)
+        for name, endpoint, topic, msg in fedmsg.tail_messages(**config):
+            info = None
+            if "buildsys.build.state.change" in topic:
+                info = check_pkg(msg['msg'])
+
+            if info is None:
+                continue
+
+    create_tree(fedcli, info)
 #			if "kernel" in msg['msg']['name']:
 #			if msg['msg']['instance'] == "primary":
 #				if msg['msg']['new'] == 1:
