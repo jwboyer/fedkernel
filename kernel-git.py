@@ -20,6 +20,8 @@ from git import Repo
 
 from parse_spec import *
 
+from exp_tree import *
+
 pkg_git_dir = '/home/jwboyer/tmp/kernel'
 linux_git_dir = '/home/jwboyer/tmp/linux'
 
@@ -225,6 +227,8 @@ def create_tree(fedcli, info):
         print 'Could not create tree for branch %s' % b
         return
 
+    # Get the package git repo and prep the tree from the commit that
+    # corresponds to this build
     pkg = Repo(pkg_git_dir)
     pkg_git = pkg.git
 
@@ -235,6 +239,43 @@ def create_tree(fedcli, info):
     prep_pkg_git(fedcli)
 
     specv = parse_spec("%s/kernel.spec" % pkg_git_dir)
+
+    # Get the working directory for this pkg git tree and the git repo
+    # that it contains
+    wdir = get_work_dir(specv, tag)
+
+    prepr = Repo(wdir)
+    prepg = prepr.git
+
+    # OK, the below probably needs some explanation.
+    # We know that the pkg-git prep will create a git tree with the base
+    # commit being one of two things; 1) a tree with all upstream content
+    # contained within the root commit or 2) a root commit with the bulk of
+    # the upstream content followed by a single commit for any stable patch
+    #
+    # So the code below gets the revision list for the git tree that is created
+    # by 'fedpkg prep' and then uses either the first commit for the base
+    # revision, or the second commit in the case of a stable kernel.
+    #
+    # Note: I have no idea how this will scale to a very large number of
+    # commits (patches in the spec), but since it is just returning a list
+    # of sha1sums and we tend to not carry more than a couple hundred patches
+    # I suspect it will be ok.
+    revlist = prepg.rev_list('--reverse', 'HEAD')
+    rvlist = revlist.split('\n')
+
+    if specv['stable_update'] == 1:
+        baserev = rvlist[1]
+    else:
+        baserev = rvlist[0]
+
+    # Now generate a patch that we are going to apply to the exploded tree
+    # with git-am later
+    #
+    # Note: Another warning about scale here.  This is literally all of the
+    # patches we have in the spec.  It might be large.  We'll see I guess.
+    patch = prepg.format_patch('--stdout', '%s' % (baserev + '..'))
+
 
 if __name__ == '__main__':
 
