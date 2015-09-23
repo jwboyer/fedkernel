@@ -4,30 +4,32 @@ import os
 import string
 import sys
 
+from git import Repo
+
 from parse_spec import *
 
 def get_base_tag(specv):
-    if specv['released_kernel'] == 0:
-        if specv['rcrev'] == 0:
+    if specv['released_kernel'] == '0':
+        if specv['rcrev'] == '0':
             # This should be a merge window kernel, which means gitrev
             # shouldn't be 0.  Since we only call this if gitrev is 0, we have
             # a problem
             sys.exit(1)
         rc = specv['rcrev']
-        base = specv['base_sublevel'] + 1
-        tag = 'v4.%d-rc%d' % (base, rc)
+        base = '%s' % (int(specv['base_sublevel']) + 1)
+        tag = 'v4.%s-rc%s' % (base, rc)
     else:
-        tag = 'v4.%d.%d' % (specv['base_sublevel'], specv['stable_update'])
+        tag = 'v4.%s.%s' % (specv['base_sublevel'], specv['stable_update'])
     return tag
 
 def get_base_commit(specv):
 
     commit = None
 
-    if specv['gitrev'] == 0:
+    if specv['gitrev'] == '0':
         commit = get_base_tag(specv)
     else:
-        if specv['released_kernel'] != 0:
+        if specv['released_kernel'] != '0':
             sys.exit(1)
 
         # read the file that contains the gitrev commit sha
@@ -51,12 +53,19 @@ def get_work_dir(specv, tag):
 
     return maindir + "/" + lindir + "/"
 
-def prep_exp_tree(dr, branch, sha):
+def prep_exp_tree(dr, branch, specv):
 
     lin = Repo(dr)
     lingit = lin.git
 
     lingit.remote('update')
+
+    if branch == "master":
+        branch = "rawhide"
+
     lingit.checkout(branch)
+
+    sha = get_base_commit(specv)
+    print sha
     lingit.reset('--hard', sha)
 
