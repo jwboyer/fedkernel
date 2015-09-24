@@ -19,7 +19,10 @@ def get_base_tag(specv):
         base = '%s' % (int(specv['base_sublevel']) + 1)
         tag = 'v4.%s-rc%s' % (base, rc)
     else:
-        tag = 'v4.%s.%s' % (specv['base_sublevel'], specv['stable_update'])
+        if specv['stable_update'] != '0':
+            tag = 'v4.%s.%s' % (specv['base_sublevel'], specv['stable_update'])
+        else:
+            tag = 'v4.%s' % specv['base_sublevel']
     return tag
 
 def get_base_commit(specv):
