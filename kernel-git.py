@@ -289,7 +289,9 @@ def create_tree(fedcli, info):
     print temp.name
     temp.flush()
 
-    prep_exp_tree(linux_git_dir, branch, specv)
+    lingit = prep_exp_tree(linux_git_dir, branch, specv)
+
+    build_exp_tree(lingit, temp)
 
 if __name__ == '__main__':
 

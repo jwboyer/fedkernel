@@ -69,3 +69,8 @@ def prep_exp_tree(dr, branch, specv):
     print sha
     lingit.reset('--hard', sha)
 
+    return lingit
+
+def build_exp_tree(lingit, patch):
+
+    lingit.am(patch.name)
