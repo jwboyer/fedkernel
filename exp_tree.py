@@ -8,6 +8,20 @@ from git import Repo
 
 from parse_spec import *
 
+def read_gitrev(dr):
+    f = None
+    sha = None
+
+    try:
+        f = open(dr + '/gitrev', "r")
+        sha = f.readline()
+        # Make sure to get rid of the newline.  Sigh, so tedious.
+        sha = sha.strip()
+    finally:
+        f and f.close()
+
+    return sha
+
 def get_base_tag(specv):
     if specv['released_kernel'] == '0':
         if specv['rcrev'] == '0':
@@ -25,7 +39,7 @@ def get_base_tag(specv):
             tag = 'v4.%s' % specv['base_sublevel']
     return tag
 
-def get_base_commit(specv):
+def get_base_commit(pkgdir, specv):
 
     commit = None
 
@@ -36,7 +50,7 @@ def get_base_commit(specv):
             sys.exit(1)
 
         # read the file that contains the gitrev commit sha
-        #commit = read_gitrev(specv)
+        commit = read_gitrev(pkgdir)
 
     if commit is None:
         sys.exit(1)
@@ -56,9 +70,9 @@ def get_work_dir(specv, tag):
 
     return maindir + "/" + lindir + "/"
 
-def prep_exp_tree(dr, branch, specv):
+def prep_exp_tree(pkgdir, lindr, branch, specv):
 
-    lin = Repo(dr)
+    lin = Repo(lindr)
     lingit = lin.git
 
     lingit.remote('update')
@@ -68,7 +82,7 @@ def prep_exp_tree(dr, branch, specv):
 
     lingit.checkout(branch)
 
-    sha = get_base_commit(specv)
+    sha = get_base_commit(pkgdir, specv)
     print sha
     lingit.reset('--hard', sha)
 
