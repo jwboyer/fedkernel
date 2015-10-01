@@ -1,5 +1,16 @@
 #!/usr/bin/python
 
+# Copyright 2015 Red Hat Inc.
+# Author(s): Josh Boyer <jwboyer@fedoraproject.org>
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the
+# Free Software Foundation; version 2 of the License.
+# See http://www.gnu.org/copyleft/gpl.html for the full text of the license.
+
+# Ideas taken from rpmdev-bumpspec script by Michael Schwendt, Ville Skyttä,
+# Ralph Bean, et. al
+
 import re
 import sys
 import os

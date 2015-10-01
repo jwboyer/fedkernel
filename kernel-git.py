@@ -1,5 +1,13 @@
 #!/usr/bin/env python
 
+# Copyright 2015 Red Hat Inc.
+# Author(s): Josh Boyer <jwboyer@fedoraproject.org>
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the
+# Free Software Foundation; version 2 of the License.
+# See http://www.gnu.org/copyleft/gpl.html for the full text of the license.
+
 import os
 import string
 import time
