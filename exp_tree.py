@@ -88,6 +88,7 @@ def prep_exp_tree(pkgdir, lindr, branch, specv):
 
     return lingit
 
-def build_exp_tree(lingit, patch):
+def build_exp_tree(lingit, patch, tag):
 
     lingit.am(patch.name)
+    lingit.tag(tag)
