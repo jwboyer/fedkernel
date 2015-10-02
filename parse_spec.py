@@ -1,5 +1,5 @@
 #!/usr/bin/python
-
+# This Python file uses the following encoding: utf-8
 # Copyright 2015 Red Hat Inc.
 # Author(s): Josh Boyer <jwboyer@fedoraproject.org>
 #
