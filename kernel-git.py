@@ -17,6 +17,7 @@ import tempfile
 
 from koji_cli import *
 
+import logging
 import fedmsg
 import fedmsg.config
 import fedmsg.meta
@@ -152,9 +153,10 @@ if __name__ == '__main__':
     fedcli.do_imports(site='fedpkg')
 
 
-    if sys.argv[1] != None:
+    if len(sys.argv) != 1:
         info = get_build_info(sys.argv[1], True)
     else:
+        logging.basicConfig()
 
         config = fedmsg.config.load_config([], None)
         fedmsg.meta.make_processors(**config)
@@ -166,6 +168,9 @@ if __name__ == '__main__':
 
             if info is None:
                 continue
+            else:
+                create_tree(fedcli, info)
+
 
     create_tree(fedcli, info)
 #			if "kernel" in msg['msg']['name']:
