@@ -121,7 +121,7 @@ def create_tree(fedcli, info):
     revlist = prepg.rev_list('--reverse', 'HEAD')
     rvlist = revlist.split('\n')
 
-    if specv['stable_update'] == '1':
+    if specv['stable_update'] != '0':
         baserev = rvlist[1]
     else:
         baserev = rvlist[0]
