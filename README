@@ -1,0 +1,100 @@
+These scripts are used to generate an exploded source git tree from the
+Fedora kernel pkg-git tree.  Specifically, they use the build information
+found in koji for each successful build to generate a source tree from
+the SRPM and tag it with the corresponding package Name-Version-Release
+tag.  The exploded tree is hosted on kernel.org at:
+
+https://git.kernel.org/cgit/linux/kernel/git/jwboyer/fedora.git/
+
+Below are some details on how it works, some of the assumptions made, and
+a big list of things that need to be improved.
+
+## How it works.
+
+Fedora uses git for its package SCM.  This means that for every build in
+koji, we have an immutable corresponding SCM commit.  The scripts
+leverage this fact to take the build information from koji and construct
+the exploded tree from exactly the set of sources that were sent to be
+built.  Essentially the scripts:
+
+1. determine the pkg-git sha1sum for the build
+2. perform a checkout of that exact commit
+3. prep the pkg-git tree for that commit
+4. determine the upstream base release, tag or git revision
+5. resets an upstream linux.git tree the determined sha1sum
+6. extract the patches Fedora applies
+7. applies said patches to the linux.git tree
+8. tags the linux.git tree with the corresponding package build NVR
+
+The script gets the build information either from a user specified build
+NVR on the command line, or by listening to the fedmsg bus for creation
+automatically*.  This sounds pretty simple, and in operation it is but
+there are a number of gotchas and assumptions the scripts rely upon.
+
+## Assumptions
+
+- There are pkg-git and linux.git trees already checked out in the
+configured locations.
+- The build being used has patches applied in the spec file using git am
+- The branches for the various releases are already created in the
+linux.git trees.
+
+The first item means you have essentially throw-away trees for both
+pkg-git and linux.git somewhere.  They require you to have all branches
+created.  The linux.git tree requires you to have both Linus' tree and
+the upstream stable tree configured as remotes.
+
+The second item above is somewhat the crutch these scripts really rely
+upon.  Fedora kernels in the F22 and older branches use an ApplyPatch
+shell function to apply the patches on top of the base.  This works fine
+and is generally very fast when creating the tree in the %prep section.
+However, because that function is using raw patch(1), the generated
+source has no commit history and the patches can be in any format that
+patch(1) accepts.  That has the drawback that the patches themselves can
+be raw diffs with no changelogs, etc.
+
+Starting with Fedora 23, the kernel spec file uses git-am to apply
+patches on top of the base tarball/patches.  This requires that all
+patches be acceptable to git-am, which means the patches themselves have
+quite a bit more context and information in them.  While it does slow
+down the %prep section, the additional context provided for each change
+makes it a good tradeoff.  It also means we can easily get the exact
+patches back out of the prepped sources.  That is key to automating the
+creation of an exploded source tree.
+
+(It is certainly possible to have the contextual information in the patch
+ with patch(1), but in practice the human element crept in and laziness
+ or indifference meant we carried a number of sub-par diffs as patches.
+ Using git-am provides the enforcement and then we get the benefits
+ later.)
+
+## TODOs
+
+There are quite a few things that are lacking in this code.  They are, in
+no specific order:
+
+- Error checking
+- Poor fedmsg handling
+- Lack of ability to create new branches automatically (relying on assumptions)
+- Lack of graceful failure and cleanup
+- No kernel configuration information in the generated tree
+- No pushing of exploded tree
+
+Arguably, the last one in this list is probably smart for now.  We
+wouldn't want the exloded tree pushed to a public git server if it was
+created incorrectly, so manual pushing is somewhat of a safeguard.
+However it also means if someone forgets to push the tree, it won't be
+updated.
+
+### Developer info
+
+Hosted at: https://pagure.io/fedkernel
+
+The code for the koji connection is borrowed from koji itself.  The spec
+parsing code is inspired by the rpmdev-bumpspec tool.  The remainder of
+the code is primarily written by:
+
+- Josh Boyer <jwboyer@fedoraproject.org>
+
+Changes and/or pull requests can be sent to either the primary author or
+the Fedora kernel list: kernel@lists.fedoraproject.org
