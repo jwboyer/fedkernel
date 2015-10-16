@@ -11,6 +11,7 @@
 import os
 import string
 import sys
+import shutil
 
 from git import Repo
 
@@ -96,7 +97,15 @@ def prep_exp_tree(pkgdir, lindr, branch, specv):
 
     return lingit
 
-def build_exp_tree(lingit, patch, tag):
+def build_exp_tree(lingit, patch, tag, configdir, lindir):
 
+    #Apply the patches
     lingit.am(patch.name)
+
+    # Now add the Fedora config files
+    shutil.copytree(configdir, lindir + '/fedora/configs')
+    lingit.add('fedora/configs')
+    log = ('%s configs' % tag)
+    lingit.commit('-a', '-m', log)
+
     lingit.tag(tag)
