@@ -62,7 +62,13 @@ def lookup_branch(branch):
 
     return b
 
-def prep_pkg_git(fedcli):
+def prep_pkg_git():
+
+    fedcfg = ConfigParser.SafeConfigParser()
+    fedcfg.read('/etc/rpkg/fedpkg.conf')
+
+    fedcli = fedpkg.cli.fedpkgClient(fedcfg, name='fedpkg')
+    fedcli.do_imports(site='fedpkg')
 
     fedcli.args = fedcli.parser.parse_args(['prep'])
     fedcli.args.path = pkg_git_dir
@@ -72,7 +78,7 @@ def prep_pkg_git(fedcli):
 
     fedcli.args.command()
 
-def create_tree(fedcli, info):
+def create_tree(info):
 
     print "Creating tree for pkg-git commit %s with tag %s" % info
     sha = info[0]
@@ -83,6 +89,8 @@ def create_tree(fedcli, info):
     if branch is None:
         print 'Could not create tree for branch %s' % b
         return
+    else:
+        print 'sha %s tag %s branch %s' % (sha, tag, branch)
 
     # Get the package git repo and prep the tree from the commit that
     # corresponds to this build
@@ -93,7 +101,7 @@ def create_tree(fedcli, info):
     pkg_git.checkout(branch)
     pkg_git.reset('--hard', '%s' % sha)
 
-    prep_pkg_git(fedcli)
+    prep_pkg_git()
 
     specv = parse_spec("%s/kernel.spec" % pkg_git_dir)
 
@@ -149,13 +157,6 @@ def create_tree(fedcli, info):
 
 if __name__ == '__main__':
 
-    fedcfg = ConfigParser.SafeConfigParser()
-    fedcfg.read('/etc/rpkg/fedpkg.conf')
-
-    fedcli = fedpkg.cli.fedpkgClient(fedcfg, name='fedpkg')
-    fedcli.do_imports(site='fedpkg')
-
-
     if len(sys.argv) != 1:
         info = get_build_info(sys.argv[1], True)
     else:
@@ -172,10 +173,10 @@ if __name__ == '__main__':
             if info is None:
                 continue
             else:
-                create_tree(fedcli, info)
+                create_tree(info)
 
 
-    create_tree(fedcli, info)
+    create_tree(info)
 #			if "kernel" in msg['msg']['name']:
 #			if msg['msg']['instance'] == "primary":
 #				if msg['msg']['new'] == 1:
