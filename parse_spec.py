@@ -46,20 +46,22 @@ def parse_spec(specf):
             continue
 
         var = match.group('var')
+        val = match.group('val')
+        val = val.strip()
         if var == "released_kernel":
-            specv['released_kernel'] = match.group('val')
+            specv['released_kernel'] = val
             continue
         elif var == "base_sublevel":
-            specv['base_sublevel'] = match.group('val')
+            specv['base_sublevel'] = val
             continue
         elif var == "rcrev":
-            specv['rcrev'] = match.group('val')
+            specv['rcrev'] = val
             continue
         elif var == "gitrev":
-            specv['gitrev'] = match.group('val')
+            specv['gitrev'] = val
             continue
         elif var == "stable_update":
-            specv['stable_update'] = match.group('val')
+            specv['stable_update'] = val
             continue
         else:
             continue
