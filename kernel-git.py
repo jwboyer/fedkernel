@@ -15,7 +15,7 @@ import thread
 import sys
 import tempfile
 
-from koji_cli import *
+from koji_cli_local import *
 
 import logging
 import fedmsg
@@ -52,7 +52,12 @@ def lookup_branch(branch):
             'f22': 'f22',
             'f23': 'f23',
             'f24': 'f24',
-            'f25': 'master'
+            'f25': 'f25',
+            'f26': 'f26',
+            'f27': 'f27',
+            'f28': 'f28',
+            'f29': 'f29',
+            'f30': 'master'
             }
 
     try:
@@ -83,6 +88,10 @@ def create_tree(info):
     print "Creating tree for pkg-git commit %s with tag %s" % info
     sha = info[0]
     tag = info[1]
+    dist = re.split(r'.*fc(\d+)', tag)
+    if len(dist) is 1:
+        print 'Not a fedora build.  Skipping'
+        return
     b = 'f' + re.split(r'.*fc(\d+)', tag)[1]
 
     branch = lookup_branch(b)
@@ -90,7 +99,11 @@ def create_tree(info):
         print 'Could not create tree for branch %s' % b
         return
     else:
-        print 'sha %s tag %s branch %s' % (sha, tag, branch)
+        if branch is 'f22':
+            print 'f22 build.  f22 is old and special.  Skipping.'
+            return
+        else:
+            print 'sha %s tag %s branch %s' % (sha, tag, branch)
 
     # Get the package git repo and prep the tree from the commit that
     # corresponds to this build

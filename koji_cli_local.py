@@ -25,7 +25,10 @@
 #       Cristian Balint <cbalint@redhat.com>
 
 import os
+import sys
+import socket
 import ConfigParser
+import krbV
 import koji
 
 class Options:
@@ -60,6 +63,8 @@ def get_options():
         'cert': '~/.koji/client.crt',
         'ca': '~/.koji/clientca.crt',
         'serverca': '~/.koji/serverca.crt',
+        'keytab': None,
+        'principal': None,
         'authtype': None
     }
     # grab settings from /etc/koji.conf first, and allow them to be
@@ -117,6 +122,16 @@ def ensure_connection(session):
         warn(_("WARNING: The server is at API version %d and the client is at %d" % (
             ret, koji.API_VERSION)))
 
+def has_krb_creds():
+    if not sys.modules.has_key('krbV'):
+        return False
+    try:
+        ctx = krbV.default_context()
+        ccache = ctx.default_ccache()
+        princ = ccache.principal()
+        return True
+    except krbV.Krb5Error:
+        return False
 
 def activate_session(session):
     """Test and login the session is applicable"""
@@ -131,6 +146,20 @@ def activate_session(session):
     elif options.authtype == "password" or options.user and options.authtype is None:
         # authenticate using user/password
         session.login()
+    elif options.authtype == "kerberos" or has_krb_creds() and options.authtype is None:
+        try:
+            if options.keytab and options.principal:
+                session.krb_login(principal=options.principal, keytab=options.keytab, proxyuser=options.runas)
+            else:
+                session.krb_login(proxyuser=options.runas)
+        except socket.error as e:
+            warn(_("Could not connect to Kerberos authentication service: %s") % e.args[1])
+        except Exception as e:
+            if krbV is not None and isinstance(e, krbV.Krb5Error):
+                print "Kerberos authentication failed: %s (%s)" % (e.args[1], e.args[0])
+            else:
+                raise
+
     if not options.noauth and options.authtype != "noauth" and not session.logged_in:
         error(_("Unable to log in, no authentication methods available"))
     ensure_connection(session)
