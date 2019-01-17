@@ -63,10 +63,18 @@ def parse_spec(specf):
         elif var == "stable_update":
             specv['stable_update'] = val
             continue
+        elif var == "kversion":
+            specv['kversion'] = val
+            specv['major_version'] = val.split(".")[0]
+            bar = val.split("-rc")
+            if len(bar) > 1:
+                specv['tar_suffix'] = "-rc%s" % specv['rcrev']
+            continue
         else:
             continue
 
     print specv['released_kernel']
+    print specv['major_version']
     print specv['base_sublevel']
     print specv['rcrev']
     print specv['gitrev']
