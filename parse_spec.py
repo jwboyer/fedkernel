@@ -69,6 +69,8 @@ def parse_spec(specf):
             bar = val.split("-rc")
             if len(bar) > 1:
                 specv['tar_suffix'] = "-rc%s" % specv['rcrev']
+            else:
+                specv['tar_suffix'] = None
             continue
         else:
             continue
