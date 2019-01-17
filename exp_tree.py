@@ -55,7 +55,7 @@ def get_base_tag(specv):
         tag = 'v%s.%s-rc%s' % (major, base, rc)
     else:
         if specv['stable_update'] != '0':
-            tag = 'v%s.%s.%s' % (spevc['major_version'], specv['base_sublevel'], specv['stable_update'])
+            tag = 'v%s.%s.%s' % (specv['major_version'], specv['base_sublevel'], specv['stable_update'])
         else:
             tag = 'v%s.%s' % (specv['major_version'], specv['base_sublevel'])
     return tag
