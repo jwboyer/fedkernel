@@ -57,7 +57,8 @@ def lookup_branch(branch):
             'f27': 'f27',
             'f28': 'f28',
             'f29': 'f29',
-            'f30': 'master'
+            'f30': 'f30',
+            'f31': 'master'
             }
 
     try:
