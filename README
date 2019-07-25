@@ -9,6 +9,17 @@ https://git.kernel.org/cgit/linux/kernel/git/jwboyer/fedora.git/
 Below are some details on how it works, some of the assumptions made, and
 a big list of things that need to be improved.
 
+## Quick Start
+
+The script depends on fedpkg, fedora-messaging, python3-koji, and
+python3-GitPython. To run the message consumer, run:
+
+$ fedora-messaging --conf fedkernel.toml.example consume --callback-file kernel-git.py:callback
+
+The script supports providing a Koji build ID to manually create the tree:
+
+$ ./kernel-git.py 1349425
+
 ## How it works.
 
 Fedora uses git for its package SCM.  This means that for every build in
