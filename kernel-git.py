@@ -39,8 +39,8 @@ def check_pkg(msg):
     if msg['instance'] == "primary":
         if msg['new'] == 1:
             if msg['name'] == "kernel":
-                print msg['name']
-                print msg['build_id']
+                print(msg['name'])
+                print(msg['build_id'])
                 buildinfo = get_build_info(msg['build_id'])
 
     return buildinfo
@@ -86,25 +86,25 @@ def prep_pkg_git():
 
 def create_tree(info):
 
-    print "Creating tree for pkg-git commit %s with tag %s" % info
+    print("Creating tree for pkg-git commit %s with tag %s" % info)
     sha = info[0]
     tag = info[1]
     dist = re.split(r'.*fc(\d+)', tag)
     if len(dist) is 1:
-        print 'Not a fedora build.  Skipping'
+        print('Not a fedora build.  Skipping')
         return
     b = 'f' + re.split(r'.*fc(\d+)', tag)[1]
 
     branch = lookup_branch(b)
     if branch is None:
-        print 'Could not create tree for branch %s' % b
+        print('Could not create tree for branch %s' % b)
         return
     else:
         if branch is 'f22':
-            print 'f22 build.  f22 is old and special.  Skipping.'
+            print('f22 build.  f22 is old and special.  Skipping.')
             return
         else:
-            print 'sha %s tag %s branch %s' % (sha, tag, branch)
+            print('sha %s tag %s branch %s' % (sha, tag, branch))
 
     # Get the package git repo and prep the tree from the commit that
     # corresponds to this build
@@ -160,14 +160,14 @@ def create_tree(info):
     for line in patch:
         temp.write(line.encode("utf-8"))
 
-    print temp.name
+    print(temp.name)
     temp.flush()
 
     lingit = prep_exp_tree(pkg_git_dir, linux_git_dir, branch, specv)
 
     build_exp_tree(lingit, temp, tag, wdir + 'configs', linux_git_dir)
 
-    print "Created exploded tree for %s" % tag
+    print("Created exploded tree for %s" % tag)
 
 if __name__ == '__main__':
 

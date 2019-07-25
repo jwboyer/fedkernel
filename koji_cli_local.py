@@ -156,7 +156,7 @@ def activate_session(session):
             warn(_("Could not connect to Kerberos authentication service: %s") % e.args[1])
         except Exception as e:
             if krbV is not None and isinstance(e, krbV.Krb5Error):
-                print "Kerberos authentication failed: %s (%s)" % (e.args[1], e.args[0])
+                print("Kerberos authentication failed: %s (%s)" % (e.args[1], e.args[0]))
             else:
                 raise
 
@@ -164,7 +164,7 @@ def activate_session(session):
         error(_("Unable to log in, no authentication methods available"))
     ensure_connection(session)
     if options.debug:
-        print "successfully connected to hub"
+        print("successfully connected to hub")
 
 ###
 # Non-koji code below
@@ -191,7 +191,7 @@ def get_build_info(build_id, nvr=False):
         info = session.getBuild(int(build_id))
 
     if info is None:
-        print "No such build: %s" % build
+        print("No such build: %s" % build)
         return None
 
     task = None
@@ -199,16 +199,16 @@ def get_build_info(build_id, nvr=False):
         task = session.getTaskInfo(info['task_id'], request=True)
 
     nvrtag = "%(name)s-%(version)s-%(release)s" % info
-    print nvrtag
+    print(nvrtag)
 
     if task is None:
         return None
 
     tasklabel = koji.taskLabel(task)
-    print tasklabel
+    print(tasklabel)
 
     sha = get_sha(tasklabel)
-    print sha
+    print(sha)
     return (sha, nvrtag)
 
 
