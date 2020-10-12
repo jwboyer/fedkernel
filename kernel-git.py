@@ -285,6 +285,7 @@ def create_tree(sha, tag):
 
     fedcli = fedpkg.cli.fedpkgClient(fedcfg, name='fedpkg')
     fedcli.do_imports(site='fedpkg')
+    fedcli.extra_args = None
 
     fedcli.args = fedcli.parser.parse_args(['prep'])
     fedcli.args.path = pkg_git_dir
