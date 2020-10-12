@@ -280,7 +280,7 @@ def create_tree(sha, tag):
     pkg_git.checkout(branch)
     pkg_git.reset('--hard', '%s' % sha)
 
-    fedcfg = configparser.SafeConfigParser()
+    fedcfg = configparser.ConfigParser()
     fedcfg.read('/etc/rpkg/fedpkg.conf')
 
     fedcli = fedpkg.cli.fedpkgClient(fedcfg, name='fedpkg')
