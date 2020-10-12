@@ -277,6 +277,10 @@ def create_tree(sha, tag):
     pkg_git = pkg.git
 
     pkg_git.remote('update')
+    # Sometimes the current branch has untracked files that are tracked
+    # on a different branch.  Clean the untracked files before switching
+    # branches.
+    pkg_git.clean('-f')
     pkg_git.checkout(branch)
     pkg_git.reset('--hard', '%s' % sha)
 
