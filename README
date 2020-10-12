@@ -99,7 +99,7 @@ updated.
 
 ### Developer info
 
-Hosted at: https://pagure.io/fedkernel
+Hosted at: https://github.com/jwboyer/fedkernel
 
 The code for the koji connection is borrowed from koji itself.  The spec
 parsing code is inspired by the rpmdev-bumpspec tool.  The remainder of
