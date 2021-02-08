@@ -57,7 +57,7 @@ BRANCHES = {
     'f31': 'f31',
     'f32': 'f32',
     'f33': 'f33',
-    'f34': 'master',
+    'f34': 'rawhide',
 }
 
 
